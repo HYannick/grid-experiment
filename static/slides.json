@@ -1,0 +1,44 @@
+[
+  {
+    "id": 0,
+    "title": "Serenity",
+    "cover": "/slide-9.jpg",
+    "subCover": "/sub-slide-1.jpg",
+    "newsTitle": "How people changes through decades"
+  },
+  {
+    "id": 1,
+    "title": "Beauty",
+    "cover": "/slide-6.jpg",
+    "subCover": "/sub-slide-0.jpg",
+    "newsTitle": "New Epic Chill/Trap song"
+  },
+  {
+    "id": 2,
+    "title": "Strength",
+    "cover": "/slide-5.jpg",
+    "subCover": "/sub-slide-3.jpg",
+    "newsTitle": "On the beach chilling"
+  },
+  {
+    "id": 3,
+    "title": "Honor",
+    "cover": "/slide-8.jpg",
+    "subCover": "/sub-slide-4.jpg",
+    "newsTitle": "What does that even mean?"
+  },
+  {
+    "id": 4,
+    "title": "Love",
+    "cover": "/slide-4.jpg",
+    "subCover": "/sub-slide-2.jpg",
+    "newsTitle": "Clozee hits again"
+  },
+  {
+    "id": 5,
+    "title": "Peace",
+    "cover": "/slide-7.jpg",
+    "subCover": "/sub-slide-5.jpg",
+    "newsTitle": "News from Bangalore"
+  }
+]
