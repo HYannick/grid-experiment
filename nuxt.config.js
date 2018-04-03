@@ -26,11 +26,9 @@ module.exports = {
     '@/assets/css/main.css',
     // SCSS file in the project
     '@/assets/css/main.scss',
-    'swiper/dist/css/swiper.css'
   ],
   plugins: [
-    { src: '~/plugins/vue-awesome-swiper.js', ssr: false },
-    { src: '~/plugins/vue-flickity.js', ssr: false },
+    { src: '~/plugins/vue-scroll.js'}
   ],
   build: {
     /*
