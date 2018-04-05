@@ -20,7 +20,8 @@
     "lodash": "^4.17.5",
     "nuxt": "^1.0.0",
     "vue-images-loaded": "^1.1.2",
-    "vue-scroll": "^2.1.7"
+    "vue-scroll": "^2.1.7",
+    "vue-scrollto": "^2.11.0"
   },
   "devDependencies": {
     "babel-eslint": "^8.2.1",

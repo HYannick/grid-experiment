@@ -1,51 +1,12 @@
 <template>
-  <div class="asia">
-    <section class="asia__template">
-      <img class="asia__template-background" src="/asia-0.jpg"/>
-      <header>
-        <div class="logo">
-          <svg>
-            <use xlink:href="#china-logo"></use>
-          </svg>
-        </div>
-        <ul class="nav">
-          <li><a href="#0">Galleries</a></li>
-          <li><a href="#0">Photography tours</a></li>
-          <li><a href="#0">About</a></li>
-        </ul>
-        <div class="booking">
-          Book a trip
-        </div>
-      </header>
-      <div class="big__heading">
-        <div class="big__heading-titles" style="margin-bottom: 2rem">
-          <h3>Guided photography tours</h3>
-          <h1>GET THE PICTURE</h1>
-        </div>
-        <div class="go">
-          <button @click="updateFrame">Enter</button>
-        </div>
-        <div class="big__heading-description">
-          <p>Join InsideAsia Tours for a photographic journey to remember.
-            We open doors to once-in-a-lifetime encounters and in-depth cultural experiences; all you need is your camera at the ready</p>
-        </div>
-        <button @click="slideDown" class="down">
-          <svg>
-            <use xlink:href="#arrow-down"></use>
-          </svg>
-        </button>
-      </div>
+  <div class="asia__template">
+    <a-header></a-header>
+    <section class="hero">
+      <img class="hero__background" src="/asia-0.jpg"/>
+      <a-hero-heading @onGo="updateFrame" @onPressedDown="slideDown"></a-hero-heading>
     </section>
-    <section class="key-benefits">
-      <div class="key-benefit">
-        <div class="item">Key Benefit 1</div>
-      </div>
-      <div class="key-benefit">
-        <div class="item">Key Benefit 2</div>
-      </div>
-      <div class="key-benefit">
-        <div class="item">Key Benefit 3</div>
-      </div>
+    <section id="key-benefits" class="key-benefits">
+      <a-key-benefit :kb="kb" v-for="(kb, index) in keyBenefits" :key="index"></a-key-benefit>
     </section>
   </div>
 </template>
@@ -53,26 +14,62 @@
 <script>
   import anime from 'animejs';
   import _ from 'lodash';
+  import AHeader from '~/components/Header'
+  import AHeroHeading from '~/components/HeroHeading'
+  import AKeyBenefit from '~/components/KeyBenefit'
 
   export default {
+    components: {
+      AHeader,
+      AHeroHeading,
+      AKeyBenefit
+    },
     data() {
       return {
+        keyBenefits: [
+          {
+            cover: '/kb-5.jpg',
+            subTitle: '風景',
+            title: 'Landscapes',
+            url: '#nono',
+          },
+          {
+            cover: '/kb-2.jpg',
+            subTitle: '自然',
+            title: 'Nature',
+            url: '#nono',
+          },
+          {
+            cover: '/kb-0.jpg',
+            subTitle: '人',
+            title: 'People',
+            url: '#nono',
+          }
+        ],
         DOM: {},
         rect: {},
         paths: {},
         isAnimating: false,
         settings: {
           animation: {
-            slides: {
-              duration: 400,
-              easing: 'easeOutQuint'
-            },
             shape: {
               duration: 400,
               easing: {in: 'easeOutQuint', out: 'easeInQuad'}
+            },
+            mainSettings: {
+              duration: 700,
+              easing: [0.8, 0, 0.2, 1],
             }
           },
           frameFill: '#000'
+        },
+        scrollToSettings: {
+          container: 'body',
+          easing: [0.8, 0, 0.2, 1],
+          cancelable: true,
+          offset: -70,
+          x: false,
+          y: true
         }
       }
     },
@@ -84,28 +81,121 @@
     },
     mounted() {
       document.body.style.overflow = 'hidden'
-      this.DOM.el = document.querySelector('.asia__template')
+      this.DOM.el = document.querySelector('.hero')
       this.DOM.titles = this.DOM.el.querySelector('header');
-      this.DOM.bg = this.DOM.el.querySelector('.asia__template-background')
+      this.DOM.bg = this.DOM.el.querySelector('.hero__background')
       this.DOM.goButton = this.DOM.el.querySelector('.big__heading > .go')
       this.DOM.downButton = this.DOM.el.querySelector('.big__heading > .down')
 
       this.DOM.title = this.DOM.el.querySelector('.big__heading')
       this.DOM.description = this.DOM.el.querySelector('.big__heading > .big__heading-description')
+
       this.rect = this.DOM.el.getBoundingClientRect();
+
+      this.DOM.kb = Array.from(document.querySelectorAll('.key-benefit'))
+      const observer = new IntersectionObserver((entries) => {
+        const animateShape = (target, state) => {
+          const t = anime.timeline().add({
+            targets: target.cover,
+            duration: 1000,
+            easing: 'linear',
+            opacity: {
+              value: state === 'kb-final' ? [1, 0] : [0, 1]
+            }
+          })
+            .add({
+              targets: target.path,
+              duration: 2000,
+              elasticity: 100,
+              d: this.calculatePath(state, target.rtl),
+              offset: '-=900'
+            })
+            .add({
+              targets: target.content,
+              duration: 2000,
+              translateY: state === 'kb-final' ?  [0, '50%'] : ['50%', 0],
+              elasticity: 200,
+              opacity: state === 'kb-final' ?  [1, 0] : [0, 1],
+              offset: '-=1900'
+            })
+            .add({
+              targets: target.border,
+              duration: 2000,
+              translateY: state === 'kb-final' ?  ['-50%', 0] : [0, '-50%'],
+              offset: '-=2000'
+            })
+          return t.play()
+
+        }
+        entries.forEach(entry => {
+          const el = {
+            path: entry.target.querySelector('.key-benefit__shape path'),
+            cover: entry.target.querySelector('.key-benefit > .key-benefit__img'),
+            content: entry.target.querySelector('.key-benefit > .key-benefit__content'),
+            border: entry.target.querySelector('.key-benefit > .key-benefit__content > .key-benefit__content-border'),
+            rtl: entry.target.rtl
+          }
+          if (entry.intersectionRatio > 0) {
+            animateShape(el, 'kb-initial')
+          } else {
+            animateShape(el, 'kb-final')
+          }
+        });
+      });
+
+      this.DOM.kb.forEach((kb, i) => {
+        const rtl = i % 2 === 0 ? 'left' : 'right';
+        this.kbFrame(kb, i, rtl)
+        kb.rtl = rtl
+        observer.observe(kb);
+      });
+
       this.createFrame()
     },
     methods: {
-      calculatePath(path = 'initial') {
-        const r = Math.sqrt(Math.pow(this.rect.height, 2) + Math.pow(this.rect.width, 2));
+      calculatePath(path = 'initial', rtl) {
+        let r = Math.sqrt(Math.pow(this.rect.height, 2) + Math.pow(this.rect.width, 2));
         const rInitialOuter = r;
         const rInitialInner = r;
         const rFinalOuter = r;
         const rFinalInner = this.rect.width / 4.5
         const getCenter = () => `${this.rect.width / 2}, ${this.rect.height / 2}`;
-        return path === 'initial' ?
-          `M ${this.rect.width / 2}, ${this.rect.height / 2} m 0 ${-rInitialOuter} a ${rInitialOuter} ${rInitialOuter} 0 1 0 1 0 z m -1 ${rInitialOuter - rInitialInner} a ${rInitialInner} ${rInitialInner} 0 1 1 -1 0 Z` :
-          `M ${getCenter()} m 0 ${-rFinalOuter} a ${rFinalOuter} ${rFinalOuter} 0 1 0 1 0 z m -1 ${rFinalOuter - rFinalInner} a ${rFinalInner} ${rFinalInner} 0 1 1 -1 0 Z`;
+        const getPos = (distance, rtl) =>
+          rtl === 'left' ? `${distance}, ${this.rect.height / 2}` : `${this.rect.width-distance}, ${this.rect.height / 2}`;
+        if (path === 'initial') {
+          return `M ${getCenter()} m 0 ${-rInitialOuter} a ${rInitialOuter} ${rInitialOuter} 0 1 0 1 0 z m -1 ${rInitialOuter - rInitialInner} a ${rInitialInner} ${rInitialInner} 0 1 1 -1 0 Z`
+        } else if (path === 'kb-initial') {
+          const rFinalInner = this.rect.width / 3.5;
+          return `M ${getPos(this.rect.width / 4, rtl)} m 0 ${-rFinalOuter} a ${rFinalOuter} ${rFinalOuter} 0 1 0 1 0 z m -1 ${rFinalOuter - rFinalInner} a ${rFinalInner} ${rFinalInner} 0 1 1 -1 0 Z`;
+        } else if (path === 'kb-final') {
+          const rFinalInner = this.rect.width / 5;
+          return `M ${getPos(rFinalInner, rtl)} m 0 ${-rFinalOuter} a ${rFinalOuter} ${rFinalOuter} 0 1 0 1 0 z m -1 ${rFinalOuter - rFinalInner} a ${rFinalInner} ${rFinalInner} 0 1 1 -1 0 Z`;
+        } else {
+          return `M ${getCenter()} m 0 ${-rFinalOuter} a ${rFinalOuter} ${rFinalOuter} 0 1 0 1 0 z m -1 ${rFinalOuter - rFinalInner} a ${rFinalInner} ${rFinalInner} 0 1 1 -1 0 Z`;
+        }
+
+      },
+      kbFrame(el, i, rtl) {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+        const kbDims = el.getBoundingClientRect();
+        svg.setAttribute('class', 'key-benefit__shape');
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '100%');
+        svg.setAttribute('viewbox', `0 0 ${kbDims.width} ${kbDims.height}`);
+        this.kbPaths = {
+          initial: this.calculatePath('kb-initial', rtl),
+          final: this.calculatePath('kb-final', rtl)
+        };
+        svg.innerHTML = `
+          <defs>
+            <clipPath id="kb-shape__clip-${i}">
+              <path fill="#FFF" d="${this.kbPaths.initial}"></path>
+            </clipPath>
+          </defs>
+          <rect clip-path="url(#kb-shape__clip-${i})" fill="#fff" x="0" y="0" width="100%" height="100%"></rect>
+            `;
+        el.appendChild(svg);
+        this.DOM.kbShape = svg.querySelector('path');
       },
       createFrame() {
         this.DOM.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
@@ -129,7 +219,7 @@
         this.DOM.shape = this.DOM.svg.querySelector('path');
       },
       slideDown() {
-        console.log('so far so good')
+        this.$scrollTo('.key-benefits', 1000, this.scrollToSettings)
       },
       updateFrame() {
         document.body.style.overflow = 'visible'
@@ -139,7 +229,7 @@
           targets: this.DOM.shape,
           duration: this.settings.animation.shape.duration,
           easing: this.settings.animation.shape.easing.in,
-          d: this.calculatePath('final'),
+          d: this.calculatePath('final')
         })
 
         const animateShapeOut = () => {
@@ -147,8 +237,8 @@
           t
             .add({
               targets: this.DOM.goButton,
-              duration: 700,
-              easing: [0.8, 0, 0.2, 1],
+              duration: this.settings.animation.mainSettings.duration,
+              easing: this.settings.animation.mainSettings.easing,
               translateY: 10,
               opacity: 0,
               height: 0
@@ -158,28 +248,28 @@
               duration: this.settings.animation.shape.duration,
               easing: this.settings.animation.shape.easing.out,
               d: this.paths.initial,
-              offset: '-=700'
+              offset: '-=300'
             })
             .add({
               targets: this.DOM.bg,
-              duration: 700,
-              easing: [0.8, 0, 0.2, 1],
+              duration: this.settings.animation.mainSettings.duration,
+              easing: this.settings.animation.mainSettings.easing,
               scale: [1, 1.5],
               opacity: 0.2,
               offset: '-=600',
             })
             .add({
               targets: this.DOM.title,
-              duration: 700,
-              easing: [0.8, 0, 0.2, 1],
+              duration: this.settings.animation.mainSettings.duration,
+              easing: this.settings.animation.mainSettings.easing,
               scale: [1, 0.8],
               translateY: [0, -100],
               offset: '-=700',
             })
             .add({
               targets: this.DOM.description,
-              duration: 700,
-              easing: [0.8, 0, 0.2, 1],
+              duration: this.settings.animation.mainSettings.duration,
+              easing: this.settings.animation.mainSettings.easing,
               height: this.DOM.description.querySelector('p').getBoundingClientRect().height,
               translateY: [20, 0],
               opacity: 1,
@@ -187,8 +277,8 @@
             })
             .add({
               targets: this.DOM.downButton,
-              duration: 700,
-              easing: [0.8, 0, 0.2, 1],
+              duration: this.settings.animation.mainSettings.duration,
+              easing: this.settings.animation.mainSettings.easing,
               opacity: 1,
               translateY: [600, 100],
               height: 80,
@@ -204,7 +294,7 @@
       },
       scrollHandler(e) {
         let elementHeight = this.DOM.bg.getBoundingClientRect().height
-        this.DOM.bg.style.transform = `translateY(${-window.pageYOffset}px) scale(1.5)`
+        this.DOM.bg.style.transform = `translateY(${-window.pageYOffset / 2}px) scale(1.5)`
         this.DOM.bg.style.opacity = (-(1 - (elementHeight - window.pageYOffset) / elementHeight) * 2) + 0.2;
       }
     }
@@ -212,116 +302,30 @@
 </script>
 
 <style lang="scss">
-  header {
-    display: flex;
-    align-self: center;
-    padding: 1rem 2rem;
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    width: 100%;
-  }
 
-  .big__heading {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    h3 {
-      color: #47494e;
-      font-size: 2vw;
-      letter-spacing: 2px;
-      font-weight: normal;
-      margin-bottom: 1rem;
-    }
-    h1 {
-      font-size: 6vw;
-      color: crimson;
-      font-family: 'Cormorant', serif;
-      font-weight: bold;
-    }
-    button {
-      border: none;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      background: transparent;
-      text-transform: uppercase;
-      cursor: pointer;
-      outline: crimson;
-      position: relative;
-      width: 5rem;
-      height: 5rem;
-      &:before {
-        content: '';
-        width: 5rem;
-        height: 5rem;
-        background: crimson;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        border-radius: 50%;
-        z-index: -1;
-        transform: translate(-50%, -50%) scale(1);
-        transition: 0.3s cubic-bezier(0.8, 0, 0.2, 1);
-      }
-      &:active:before {
-        transform: translate(-50%, -50%) scale(1) !important;
-      }
-      &:hover:before {
-        transform: translate(-50%, -50%) scale(1.2);
-      }
-    }
-    .down {
-      opacity: 0;
-      visibility: hidden;
-      height: 0;
-      &:before {
-        border: 2px solid crimson;
-        background: transparent;
-      }
-      &:hover {
-        svg {
-          transform: scale(1.1)
-        }
-      }
-      svg {
-        width: 2rem;
-        height: 2rem;
-        fill: #333;
-        transition: 0.3s;
-      }
-    }
-    &-description {
-      opacity: 0;
-      height: 0;
-      font-size: 2vw;
-      max-width: 800px;
-      p {
-        display: block;
-        margin-bottom: 4rem;
-        line-height: 1.5;
-        font-family: "Droid Sans", sans-serif;
-      }
-    }
-  }
-
-  .asia__template {
+  .hero {
     height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     position: relative;
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 10rem;
+      background: -moz-linear-gradient(bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+      background: -webkit-linear-gradient(bottom, rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
+      background: linear-gradient(to top, rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#00ffffff',GradientType=0 );
+
+    }
   }
 
-  .asia__template-background {
+  .hero__background {
     display: block;
     height: 100%;
     position: absolute;
@@ -332,62 +336,10 @@
     opacity: 0.5;
   }
 
-  .logo {
-    flex: 1;
-    svg {
-      width: 3rem;
-      height: 3rem;
-    }
-    h1 {
-      font-size: 2rem;
-      font-weight: lighter;
-      span {
-        font-weight: bold;
-      }
-    }
-  }
-
-  .nav {
-    flex: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    list-style: none;
-    li {
-      margin: 0 1rem;
-      a {
-        text-transform: uppercase;
-        color: #000;
-        letter-spacing: 2px;
-      }
-    }
-  }
-
-  .booking {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    font-size: 1rem;
-  }
-
   .shape {
     position: absolute;
     z-index: 0;
     top: 0;
   }
 
-  .key-benefit {
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    &:nth-child(odd) {
-      background: crimson;
-    }
-    .item {
-
-    }
-  }
 </style>
