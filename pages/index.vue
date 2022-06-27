@@ -13,6 +13,9 @@
         <li>
           <nuxt-link to="/slice">Slice Appearing</nuxt-link>
         </li>
+        <li>
+          <nuxt-link to="/paranoia">Paranoia</nuxt-link>
+        </li>
       </ul>
     </section>
   </div>

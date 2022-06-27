@@ -1,5 +1,4 @@
 import Entry from './Entry'
-import anime from 'animejs'
 
 export default class Slideshow {
   constructor(el) {

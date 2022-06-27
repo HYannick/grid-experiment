@@ -17,8 +17,10 @@
     "@fortawesome/vue-fontawesome": "0.0.22",
     "animejs": "^2.2.0",
     "charming": "^2.2.3",
-    "lodash": "^4.17.5",
-    "nuxt": "^1.0.0",
+    "gsap": "^3.10.4",
+    "imagesloaded": "^5.0.0",
+    "lodash": "^4.17.21",
+    "nuxt": "^2.15.5",
     "vue-images-loaded": "^1.1.2",
     "vue-scroll": "^2.1.7",
     "vue-scrollto": "^2.11.0"
@@ -29,7 +31,7 @@
     "eslint-friendly-formatter": "^3.0.0",
     "eslint-loader": "^1.7.1",
     "eslint-plugin-vue": "^4.0.0",
-    "node-sass": "^4.8.3",
+    "node-sass": "^4.14.1",
     "sass-loader": "^6.0.7"
   }
 }
